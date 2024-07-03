@@ -27,5 +27,5 @@ func apply_damage(ammo_type: AmmoType):
         if not _colliders[i] is HittableComponent:
             continue
         
-        _colliders[i].health = _colliders[i].health - ammo_type.get_damage(_distances[i])
+        _colliders[i].hurt(ammo_type.get_damage(_distances[i]))
         print("Doing " + str(ammo_type.get_damage(_distances[i])) + " damage!");

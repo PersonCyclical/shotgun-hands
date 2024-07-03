@@ -16,6 +16,14 @@ var _can_shotgun_jump = false
 
 var _touched_ground = 0
 
+@onready var _melee_duration_timer: Timer = $"MeleeTimers/MeleeDuration"
+@onready var _melee_cooldown_timer: Timer = $"MeleeTimers/MeleeCooldown"
+
+@onready var _melee_hurtbox: Area2D = _pivot.get_node("MeleeHurtbox")
+@onready var _debug_melee_display: Polygon2D = _melee_hurtbox.get_node("Polygon2D")
+
+@export var _melee_damage: float
+
 signal hit_enemy
 signal midair_shot
 
@@ -41,6 +49,9 @@ func _process(_delta):
 	
 	if Input.is_action_just_pressed("fire_reload"):
 		_reload()
+	
+	if Input.is_action_just_pressed("fire_melee"):
+		_melee()
 
 
 func _aim():
@@ -54,7 +65,7 @@ func _fire(mouse: int):
 
 	if not _player.is_on_floor() and _can_shotgun_jump:
 		_touched_ground += 1
-		_launch(mouse)
+		_launch()
 
 	
 	_ammo_types[mouse].fire(_pivot)
@@ -70,6 +81,28 @@ func _reload():
 		_reload_timer.start()
 
 
+func _melee():
+	if not _melee_cooldown_timer.is_stopped():
+		return
+	await _melee_hit()
+	_melee_cooldown_timer.start()
+
+
+func _melee_hit():
+	_melee_duration_timer.start()
+	_melee_hurtbox.monitoring = true
+	_debug_melee_display.visible = true
+
+	await _melee_duration_timer.timeout
+	_melee_hurtbox.monitoring = false
+	_debug_melee_display.visible = false
+
+
+func _on_hurtbox_entered(area: HittableComponent):
+	print("Doing damage!")
+	area.hurt(_melee_damage)
+
+
 func _reloaded():
 	_ammo_types[0].ammo = _ammo_types[0].max_ammo
 	_ammo_types[1].ammo = _ammo_types[1].max_ammo
@@ -79,6 +112,6 @@ func _shotgun_jump_timeout():
 	_can_shotgun_jump = false
 
 
-func _launch(mouse: int): # particle effects go here
+func _launch(): # particle effects go here
 	_player.velocity = Vector2.RIGHT.rotated(_pivot.rotation) * _shotgun_jump_blast_force * SCALE * -1
 	emit_signal("midair_shot")
