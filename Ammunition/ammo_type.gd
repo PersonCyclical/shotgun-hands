@@ -17,6 +17,9 @@ class_name AmmoType
 
 @export var blast_force: float
 
+var can_fire = true
+@export var _cooldown_timer: Timer
+
 var _angle_offsets: Array[float] = []
 
 
@@ -50,10 +53,16 @@ func get_damage(distance: float) -> float:
 	return damage.back()
 
 
+func _cooldown_timeout() -> void:
+	can_fire = true
+
+
 #region interface
 
 func fire(pivot: Node2D):
 	ammo -= 1
+	can_fire = false
+	_cooldown_timer.start()
 
 	var angle_offsets = get_angle_offsets()
 

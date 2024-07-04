@@ -74,7 +74,7 @@ func _aim():
 func _fire(mouse: int):
 	if _is_overheated:
 		return
-	if _ammo_types[mouse].ammo <= 0 or not _reload_timer.is_stopped():
+	if _ammo_types[mouse].ammo <= 0 or not _reload_timer.is_stopped() or not _ammo_types[mouse].can_fire:
 		return
 
 	_increment_overheat()
