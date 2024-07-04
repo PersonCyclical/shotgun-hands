@@ -18,11 +18,22 @@ var _touched_ground = 0
 
 @onready var _melee_duration_timer: Timer = $"MeleeTimers/MeleeDuration"
 @onready var _melee_cooldown_timer: Timer = $"MeleeTimers/MeleeCooldown"
+@export var _melee_cooldown_duration: float = 0.5
+@export var _overheated_melee_cooldown_duration: float = 0.1
 
 @onready var _melee_hurtbox: Area2D = _pivot.get_node("MeleeHurtbox")
 @onready var _debug_melee_display: Polygon2D = _melee_hurtbox.get_node("Polygon2D")
 
 @export var _melee_damage: float
+
+@export var _overheat_melee_damage: float
+var _overheat: int = 0
+var _is_overheated: bool = false
+const OVERHEAT_THRESHOLD: int = 8
+@export var _overheat_timer: Timer
+@export var _placeholder_visual_box: Polygon2D
+@export var _default_color: Color
+@export var _overheated_color: Color
 
 signal hit_enemy
 signal midair_shot
@@ -32,6 +43,7 @@ func _ready():
 	_ammo_types.append(_default_ammo[0].instantiate())
 	_ammo_types.append(_default_ammo[1].instantiate())
 	add_child(_ammo_types[0]); add_child(_ammo_types[1])
+	_melee_cooldown_timer.wait_time = _melee_cooldown_duration
 
 
 # the structure here should *really* be changed, though right now im electing
@@ -60,13 +72,16 @@ func _aim():
 
 
 func _fire(mouse: int):
+	if _is_overheated:
+		return
 	if _ammo_types[mouse].ammo <= 0 or not _reload_timer.is_stopped():
 		return
+
+	_increment_overheat()
 
 	if not _player.is_on_floor() and _can_shotgun_jump:
 		_touched_ground += 1
 		_launch()
-
 	
 	_ammo_types[mouse].fire(_pivot)
 	
@@ -99,8 +114,12 @@ func _melee_hit():
 
 
 func _on_hurtbox_entered(area: HittableComponent):
-	print("Doing damage!")
-	area.hurt(_melee_damage)
+	if _is_overheated:
+		print("Doing overheated damage!")
+		area.hurt(_overheat_melee_damage)
+	else:
+		print("Doing normal damage!")
+		area.hurt(_melee_damage)
 
 
 func _reloaded():
@@ -110,6 +129,33 @@ func _reloaded():
 
 func _shotgun_jump_timeout():
 	_can_shotgun_jump = false
+
+
+func _increment_overheat():
+	_overheat += 1
+	_overheat_timer.start()
+	if _overheat > OVERHEAT_THRESHOLD:
+		_start_overheat()
+
+
+func _overheat_timeout():
+	_overheat -= 1
+	if _overheat > 0:
+		_overheat_timer.start()
+	if _overheat == 0:
+		_end_overheat()
+
+
+func _start_overheat():
+	_is_overheated = true
+	_melee_cooldown_timer.wait_time = _overheated_melee_cooldown_duration
+	_placeholder_visual_box.color = _overheated_color
+
+
+func _end_overheat():
+	_is_overheated = false
+	_melee_cooldown_timer.wait_time = _melee_cooldown_duration
+	_placeholder_visual_box.color = _default_color
 
 
 func _launch(): # particle effects go here

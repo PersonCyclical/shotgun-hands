@@ -110,10 +110,15 @@ speed = 25.0
 [node name="LossOfControlTimer" type="Timer" parent="MovementController"]
 one_shot = true
 
-[node name="FiringController" type="Node2D" parent="."]
+[node name="FiringController" type="Node2D" parent="." node_paths=PackedStringArray("_overheat_timer", "_placeholder_visual_box")]
 script = ExtResource("3_u4ryj")
 _default_ammo = Array[PackedScene]([ExtResource("4_bblcg"), ExtResource("5_6mrvq")])
 _melee_damage = 50.0
+_overheat_melee_damage = 150.0
+_overheat_timer = NodePath("MeleeTimers/OverheatTimeout")
+_placeholder_visual_box = NodePath("../Placeholder")
+_default_color = Color(0, 0, 1, 1)
+_overheated_color = Color(0.537255, 0.0352941, 0.0862745, 1)
 
 [node name="ReloadTimer" type="Timer" parent="FiringController"]
 wait_time = 0.7
@@ -130,6 +135,10 @@ wait_time = 0.05
 one_shot = true
 
 [node name="MeleeCooldown" type="Timer" parent="FiringController/MeleeTimers"]
+wait_time = 0.5
+one_shot = true
+
+[node name="OverheatTimeout" type="Timer" parent="FiringController/MeleeTimers"]
 wait_time = 0.5
 one_shot = true
 
@@ -178,4 +187,5 @@ frame_progress = 0.193913
 [connection signal="midair_shot" from="FiringController" to="." method="lose_control"]
 [connection signal="timeout" from="FiringController/ReloadTimer" to="FiringController" method="_reloaded"]
 [connection signal="timeout" from="FiringController/ShotgunJumpTimer" to="FiringController" method="_shotgun_jump_timeout"]
+[connection signal="timeout" from="FiringController/MeleeTimers/OverheatTimeout" to="FiringController" method="_overheat_timeout"]
 [connection signal="area_entered" from="ShotgunPivot/MeleeHurtbox" to="FiringController" method="_on_hurtbox_entered"]
