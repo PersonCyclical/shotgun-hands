@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://d0m6asdiav5p7"]
+[gd_scene load_steps=19 format=3 uid="uid://d0m6asdiav5p7"]
 
 [ext_resource type="Script" path="res://Actors/Player/Scripts/2d_player.gd" id="1_oua8l"]
 [ext_resource type="Script" path="res://Actors/Player/Scripts/movement_controller.gd" id="2_e27d1"]
@@ -9,6 +9,9 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vn4vr"]
 size = Vector2(25, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fcvkl"]
+size = Vector2(20, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_sh4ar"]
 atlas = ExtResource("6_xqhmg")
@@ -107,12 +110,36 @@ speed = 25.0
 [node name="LossOfControlTimer" type="Timer" parent="MovementController"]
 one_shot = true
 
-[node name="FiringController" type="Node2D" parent="."]
+[node name="FiringController" type="Node2D" parent="." node_paths=PackedStringArray("_overheat_timer", "_placeholder_visual_box")]
 script = ExtResource("3_u4ryj")
 _default_ammo = Array[PackedScene]([ExtResource("4_bblcg"), ExtResource("5_6mrvq")])
+_melee_damage = 50.0
+_overheat_melee_damage = 150.0
+_overheat_timer = NodePath("MeleeTimers/OverheatTimeout")
+_placeholder_visual_box = NodePath("../Placeholder")
+_default_color = Color(0, 0, 1, 1)
+_overheated_color = Color(0.537255, 0.0352941, 0.0862745, 1)
 
 [node name="ReloadTimer" type="Timer" parent="FiringController"]
 wait_time = 0.7
+one_shot = true
+
+[node name="ShotgunJumpTimer" type="Timer" parent="FiringController"]
+wait_time = 0.05
+one_shot = true
+
+[node name="MeleeTimers" type="Node" parent="FiringController"]
+
+[node name="MeleeDuration" type="Timer" parent="FiringController/MeleeTimers"]
+wait_time = 0.05
+one_shot = true
+
+[node name="MeleeCooldown" type="Timer" parent="FiringController/MeleeTimers"]
+wait_time = 0.5
+one_shot = true
+
+[node name="OverheatTimeout" type="Timer" parent="FiringController/MeleeTimers"]
+wait_time = 0.5
 one_shot = true
 
 [node name="Hitbox" type="CollisionShape2D" parent="."]
@@ -134,6 +161,22 @@ position = Vector2(24, 0)
 color = Color(1, 0, 0, 1)
 polygon = PackedVector2Array(-2.5, -2.5, 2.5, -2.5, 2.5, 2.5, -2.5, 2.5)
 
+[node name="MeleeHurtbox" type="Area2D" parent="ShotgunPivot"]
+collision_layer = 0
+collision_mask = 768
+monitoring = false
+monitorable = false
+
+[node name="Polygon2D" type="Polygon2D" parent="ShotgunPivot/MeleeHurtbox"]
+visible = false
+position = Vector2(28, 0)
+color = Color(1, 0.294118, 0.282353, 1)
+polygon = PackedVector2Array(-10, -22, 10, -22, 10, 22, -10, 22)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ShotgunPivot/MeleeHurtbox"]
+position = Vector2(28, 0)
+shape = SubResource("RectangleShape2D_fcvkl")
+
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -26)
 scale = Vector2(0.3, 0.3)
@@ -141,11 +184,8 @@ sprite_frames = SubResource("SpriteFrames_mpi1c")
 animation = &"run"
 frame_progress = 0.193913
 
-[node name="Timers" type="Node2D" parent="."]
-
-[node name="Reload" type="Timer" parent="Timers"]
-
-[node name="Shot" type="Timer" parent="Timers"]
-
 [connection signal="midair_shot" from="FiringController" to="." method="lose_control"]
 [connection signal="timeout" from="FiringController/ReloadTimer" to="FiringController" method="_reloaded"]
+[connection signal="timeout" from="FiringController/ShotgunJumpTimer" to="FiringController" method="_shotgun_jump_timeout"]
+[connection signal="timeout" from="FiringController/MeleeTimers/OverheatTimeout" to="FiringController" method="_overheat_timeout"]
+[connection signal="area_entered" from="ShotgunPivot/MeleeHurtbox" to="FiringController" method="_on_hurtbox_entered"]

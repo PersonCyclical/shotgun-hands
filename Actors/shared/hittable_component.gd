@@ -33,5 +33,9 @@ func get_health() -> float:
 	return _health
 
 
+func hurt(value: float) -> void:
+	health = max(health - value, 0)
+
+
 func destroy() -> void:
 	parent.queue_free()
