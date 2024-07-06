@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c32res81juhqg"]
+[gd_scene load_steps=11 format=3 uid="uid://c32res81juhqg"]
 
 [ext_resource type="PackedScene" uid="uid://7vyirkeofdrx" path="res://Actors/shared/HittableComponent.tscn" id="1_ms6ri"]
 [ext_resource type="PackedScene" uid="uid://d0m6asdiav5p7" path="res://Actors/Player/2DPlayer.tscn" id="1_qs7i5"]
@@ -13,6 +13,13 @@ size = Vector2(100, 100)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tu80g"]
 size = Vector2(2000, 2)
+
+[sub_resource type="GDScript" id="GDScript_hnu8l"]
+script/source = "extends RigidBody2D
+
+func _on_hittable_component_destroy() -> void:
+	queue_free()
+"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gh1uu"]
 size = Vector2(30, 30)
@@ -122,8 +129,10 @@ shape = SubResource("RectangleShape2D_tu80g")
 position = Vector2(256, -29)
 collision_mask = 0
 freeze = true
+script = SubResource("GDScript_hnu8l")
 
 [node name="HittableComponent" parent="Destructible" instance=ExtResource("1_ms6ri")]
+MAX_HEALTH = 20.0
 
 [node name="Hitbox" type="CollisionShape2D" parent="Destructible/HittableComponent"]
 shape = SubResource("RectangleShape2D_gh1uu")
@@ -145,3 +154,5 @@ script = ExtResource("2_yljtj")
 
 [node name="Enemy" parent="." instance=ExtResource("4_qtr78")]
 position = Vector2(-675, -13)
+
+[connection signal="destroy" from="Destructible/HittableComponent" to="Destructible" method="_on_hittable_component_destroy"]
