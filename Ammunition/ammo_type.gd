@@ -80,7 +80,7 @@ func fire(pivot: Node2D):
 			stop_pos = Vector2(r_info["position"]["x"],r_info["position"]["y"])
 		_send_visual_pellet(angle, reticle.global_position,stop_pos,self)
 
-	hit_info.apply_damage(self)
+	#hit_info.apply_damage(self)
 
 
 ## given an angle offset, sends a ray in the given direction
