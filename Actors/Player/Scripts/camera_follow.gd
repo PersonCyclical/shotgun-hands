@@ -17,7 +17,7 @@ func _process(_delta) -> void:
 		global_position.y = player.global_position.y + static_camera_offset.y
 
 
-	var lookahead:float = -1.0 if float(player.get_node("MovementController").facing_right) == 0 else 1.0
+	var lookahead:float = -1.0 if !player.get_node("MovementController").facing_right else 1.0
 	camera_look_off = move_toward(camera_look_off, lookahead * look_ahead_intensity, look_ahead_delta)
 	global_position.x = player.global_position.x + camera_look_off + static_camera_offset.x
 
