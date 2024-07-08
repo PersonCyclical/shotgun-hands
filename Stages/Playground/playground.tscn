@@ -238,6 +238,7 @@ position_smoothing_enabled = true
 script = ExtResource("2_yljtj")
 follow_in_air = true
 static_camera_offset = Vector2(0, -75)
+look_ahead_delta = 1.5
 
 [node name="2DPlayer" parent="." instance=ExtResource("1_qs7i5")]
 

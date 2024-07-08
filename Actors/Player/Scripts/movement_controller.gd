@@ -7,7 +7,6 @@ var crouch_speed_modifier = 0.75
 @export_range(1, 10.0) var momentum_retention = 2.0
 var momentum_retention_slide = 1.0
 
-#var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 @export_group("Jump")
 @export var jump_height : float
 @export var jump_time_to_peak : float
@@ -66,6 +65,8 @@ func _physics_process(delta):
 		player.velocity.y += (jump_gravity if player.velocity.y < 0.0 else fall_gravity) * delta # no delta mb, we're in phys_process
 
 	# Handle jump.
+	if Input.is_action_just_released("move_jump") and player.velocity.y < 0:
+		player.velocity.y = jump_height / 4 # why 4 you might ask, well, i have zero fucking clue - PSK
 	if Input.is_action_just_pressed("move_jump") and player.is_on_floor():
 		player.velocity.y = jump_vel
 
@@ -160,3 +161,5 @@ func lose_control():
 
 func destroy():
 	Scenemanager.change_scene("main_menu")
+
+
