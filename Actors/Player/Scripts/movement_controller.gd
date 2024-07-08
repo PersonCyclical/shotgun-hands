@@ -1,11 +1,11 @@
 extends Node2D
 
-@export_range(1.0, 100.0) var speed: float = 10.0
-var crouch_speed_modifier: float = 0.75
+@export_range(1.0, 100.0) var speed = 10.0
+var crouch_speed_modifier = 0.75
 
 
-@export_range(1, 10.0) var momentum_retention: float = 2.0
-var momentum_retention_slide: float = 1.0
+@export_range(1, 10.0) var momentum_retention = 2.0
+var momentum_retention_slide = 1.0
 
 @export_group("Jump")
 @export var jump_height : float
@@ -17,12 +17,12 @@ var momentum_retention_slide: float = 1.0
 @onready var fall_gravity : float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.
 const SCALE = 10
 
-@onready var player: CharacterBody2D = $".."
+@onready var player = $".."
 
-@onready var hitbox:CollisionShape2D = player.find_child("Hitbox")
+@onready var hitbox = player.find_child("Hitbox")
 var default_hitbox_size
 var default_hitbox_offset
-@onready var roof_probe:RayCast2D = player.find_child("RoofProbe")
+@onready var roof_probe = player.find_child("RoofProbe")
 
 @onready var placeholder_sprite = player.find_child("Placeholder")
 var default_placeholder_polygon = PackedVector2Array([Vector2(-12, -49),Vector2(12, -49),Vector2(12, 0),Vector2(-12, 0)])
@@ -62,10 +62,10 @@ func _physics_process(delta):
 
 	# Apply gravity.
 	if not player.is_on_floor():
-		player.velocity.y += _get_gravity() * delta # no delta mb, we're in phys_process
+		player.velocity.y += (jump_gravity if player.velocity.y < 0.0 else fall_gravity) * delta # no delta mb, we're in phys_process
 
 	# Handle jump.
-	if (Input.is_action_just_released("move_jump") and player.velocity.y < 0) && _control_degree == 1:
+	if Input.is_action_just_released("move_jump") and player.velocity.y < 0:
 		player.velocity.y = jump_height / 4 # why 4 you might ask, well, i have zero fucking clue - PSK
 	if Input.is_action_just_pressed("move_jump") and player.is_on_floor():
 		player.velocity.y = jump_vel
@@ -88,16 +88,6 @@ func _physics_process(delta):
 			placeholder_sprite.polygon = default_placeholder_polygon
 			use_crouch_speed = false
 
-	_animate()
-
-	_evaluate_max_velocity()
-	_move_horizontal()
-
-	player.move_and_slide()
-
-func _get_gravity(): return jump_gravity if player.velocity.y < 0.0 else fall_gravity
-
-func _animate():
 	if player.velocity.x < 0:
 		facing_right = false
 	elif player.velocity.x > 0:
@@ -126,6 +116,10 @@ func _animate():
 		if not animated_sprite.animation == "jump":
 			animated_sprite.play("jump")
 
+	_evaluate_max_velocity()
+	_move_horizontal()
+
+	player.move_and_slide()
 
 func _evaluate_control_degree():
 	if _control_degree != 1:
@@ -167,3 +161,5 @@ func lose_control():
 
 func destroy():
 	Scenemanager.change_scene("main_menu")
+
+
