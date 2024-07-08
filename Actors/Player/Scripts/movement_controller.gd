@@ -2,13 +2,20 @@ extends Node2D
 
 @export_range(1.0, 100.0) var speed = 10.0
 var crouch_speed_modifier = 0.75
-@export_range(1.0, 50.0) var jump_power = 20.0
+
 
 @export_range(1, 10.0) var momentum_retention = 2.0
 var momentum_retention_slide = 1.0
 
 #var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
-@export_range(0, 50.0) var gravity = 9.81
+@export_group("Jump")
+@export var jump_height : float
+@export var jump_time_to_peak : float
+@export var jump_time_to_descent : float
+# Meth - PSK
+@onready var jump_vel : float = ((2.0 * jump_height) / jump_time_to_peak) * -1.
+@onready var jump_gravity : float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.
+@onready var fall_gravity : float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.
 const SCALE = 10
 
 @onready var player = $".."
@@ -37,8 +44,9 @@ func _ready():
 	default_hitbox_size = hitbox.shape.size.y
 	default_hitbox_offset = hitbox.position.y
 	speed *= SCALE
-	jump_power *= SCALE
-	gravity *= SCALE
+	jump_vel *= SCALE
+	jump_gravity *= SCALE
+	fall_gravity *= SCALE
 	momentum_retention *= SCALE
 	momentum_retention_slide *= SCALE
 
@@ -55,11 +63,11 @@ func _physics_process(delta):
 
 	# Apply gravity.
 	if not player.is_on_floor():
-		player.velocity.y += gravity * delta # no delta mb, we're in phys_process
+		player.velocity.y += (jump_gravity if player.velocity.y < 0.0 else fall_gravity) * delta # no delta mb, we're in phys_process
 
 	# Handle jump.
 	if Input.is_action_just_pressed("move_jump") and player.is_on_floor():
-		player.velocity.y -= jump_power
+		player.velocity.y = jump_vel
 
 	# Handle crouching.
 	if Input.is_action_pressed("move_crouch") and player.is_on_floor():
@@ -111,7 +119,6 @@ func _physics_process(delta):
 	_move_horizontal()
 
 	player.move_and_slide()
-
 
 func _evaluate_control_degree():
 	if _control_degree != 1:
