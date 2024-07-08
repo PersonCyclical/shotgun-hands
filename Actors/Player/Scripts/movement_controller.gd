@@ -1,8 +1,9 @@
 extends Node2D
 
+const SCALE = 10
+
 @export_range(1.0, 100.0) var speed = 10.0
 var crouch_speed_modifier = 0.75
-
 
 @export_range(1, 10.0) var momentum_retention = 2.0
 var momentum_retention_slide = 1.0
@@ -11,11 +12,13 @@ var momentum_retention_slide = 1.0
 @export var jump_height : float
 @export var jump_time_to_peak : float
 @export var jump_time_to_descent : float
-# Meth - PSK
+@export var coyote_time: float = 0.2
+
+# Meth and jumping - PSK
 @onready var jump_vel : float = ((2.0 * jump_height) / jump_time_to_peak) * -1.
 @onready var jump_gravity : float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.
 @onready var fall_gravity : float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.
-const SCALE = 10
+var coyote_time_left: float = 0.0
 
 @onready var player = $".."
 
@@ -38,7 +41,6 @@ var facing_right = true
 
 @onready var animated_sprite = player.find_child("AnimatedSprite")
 
-
 func _ready():
 	default_hitbox_size = hitbox.shape.size.y
 	default_hitbox_offset = hitbox.position.y
@@ -50,7 +52,6 @@ func _ready():
 	momentum_retention_slide *= SCALE
 
 	max_velocity_x = speed
-
 
 func _process(_delta):
 	# ONLY FOR DEBUGGING; THIS WILL BE REPLACED
@@ -64,10 +65,15 @@ func _physics_process(delta):
 	if not player.is_on_floor():
 		player.velocity.y += (jump_gravity if player.velocity.y < 0.0 else fall_gravity) * delta # no delta mb, we're in phys_process
 
+	if player.is_on_floor():
+		coyote_time_left = coyote_time
+	else:
+		coyote_time_left -= delta
+
 	# Handle jump.
 	if Input.is_action_just_released("move_jump") and player.velocity.y < 0:
 		player.velocity.y = jump_height / 4 # why 4 you might ask, well, i have zero fucking clue - PSK
-	if Input.is_action_just_pressed("move_jump") and player.is_on_floor():
+	if Input.is_action_just_pressed("move_jump") and (player.is_on_floor() or coyote_time_left > 0):
 		player.velocity.y = jump_vel
 
 	# Handle crouching.
@@ -127,7 +133,6 @@ func _evaluate_control_degree():
 		_control_degree = pow(_control_degree, 3)
 		_control_degree = clampf(_control_degree, 0, 1)
 
-
 # checks state, returns what the value of max_velocity should be
 func _evaluate_max_velocity():
 	if max_velocity_x != speed or abs(player.velocity.x) < max_velocity_x:
@@ -136,7 +141,6 @@ func _evaluate_max_velocity():
 	if max_velocity_x > speed and (player.is_on_floor() and not crouching):
 		max_velocity_x -= (max_velocity_x - speed) * _control_degree
 		max_velocity_x = max(speed, max_velocity_x)
-
 
 func _move_horizontal():
 	var direction = Input.get_axis("move_left", "move_right")
@@ -153,7 +157,6 @@ func _move_horizontal():
 		else:
 			player.velocity.x = move_toward(player.velocity.x, 0, (momentum_retention_slide * _control_degree))
 
-
 func lose_control():
 	_control_degree = 0
 	_loss_of_control_timer.start()
@@ -161,5 +164,3 @@ func lose_control():
 
 func destroy():
 	Scenemanager.change_scene("main_menu")
-
-
