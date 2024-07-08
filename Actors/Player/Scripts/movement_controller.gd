@@ -65,7 +65,7 @@ func _physics_process(delta):
 		player.velocity.y += _get_gravity() * delta # no delta mb, we're in phys_process
 
 	# Handle jump.
-	if (Input.is_action_just_released("move_jump") and player.velocity.y < 0) && _control_degree == 1:
+	if (Input.is_action_just_released("move_jump") and player.velocity.y < 0) && _control_degree == .5:
 		player.velocity.y = jump_height / 4 # why 4 you might ask, well, i have zero fucking clue - PSK
 	if Input.is_action_just_pressed("move_jump") and player.is_on_floor():
 		player.velocity.y = jump_vel
