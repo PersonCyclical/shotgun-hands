@@ -1,23 +1,17 @@
 extends Camera2D
 
-@export var follow_in_air: bool = false
-@export var static_camera_offset:Vector2 = Vector2(0.,0.)
-@export var look_ahead_intensity: float = 50
-@export var look_ahead_delta : float = 1.0
+@export var max_dist:Vector2 = Vector2(50, 50)
+@export var camera_offset: Vector2 = Vector2(0,0)
 
 @onready var player = $"../2DPlayer"
 
 var camera_look_off: float
 
 func _process(_delta) -> void:
-	if not follow_in_air:
-		if player.is_on_floor():
-			global_position.y = player.global_position.y + static_camera_offset.y
-	else:
-		global_position.y = player.global_position.y + static_camera_offset.y
+	var mouse_pos = get_local_mouse_position()
+	var des_pos = (player.position + mouse_pos)
+	des_pos = des_pos.clamp(player.position - max_dist, player.position + max_dist)
+	position = des_pos + camera_offset
 
 
-	var lookahead:float = -1.0 if !player.get_node("MovementController").facing_right else 1.0
-	camera_look_off = move_toward(camera_look_off, lookahead * look_ahead_intensity, look_ahead_delta)
-	global_position.x = player.global_position.x + camera_look_off + static_camera_offset.x
 
