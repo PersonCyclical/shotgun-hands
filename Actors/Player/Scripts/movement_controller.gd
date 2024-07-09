@@ -107,6 +107,14 @@ func _physics_process(delta):
 			placeholder_sprite.polygon = default_placeholder_polygon
 			use_crouch_speed = false
 
+	_animate()
+
+	_evaluate_max_velocity()
+	_move_horizontal()
+
+	player.move_and_slide()
+
+func _animate():
 	if player.velocity.x < 0:
 		facing_right = false
 	elif player.velocity.x > 0:
@@ -134,11 +142,6 @@ func _physics_process(delta):
 	else:
 		if not animated_sprite.animation == "jump":
 			animated_sprite.play("jump")
-
-	_evaluate_max_velocity()
-	_move_horizontal()
-
-	player.move_and_slide()
 
 func _evaluate_control_degree():
 	if _control_degree != 1:
