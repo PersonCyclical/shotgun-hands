@@ -237,8 +237,6 @@ process_callback = 0
 position_smoothing_enabled = true
 position_smoothing_speed = 7.0
 script = ExtResource("2_yljtj")
-follow_in_air = true
-look_ahead_delta = 1.5
 max_dist = Vector2(60, 40)
 camera_offset = Vector2(0, -75)
 

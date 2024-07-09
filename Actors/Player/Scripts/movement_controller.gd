@@ -12,13 +12,16 @@ var momentum_retention_slide = 1.0
 @export var jump_height : float
 @export var jump_time_to_peak : float
 @export var jump_time_to_descent : float
+@export_subgroup("Polish")
 @export var coyote_time: float = 0.2
+@export var buffer_time: float = 0.2
 
 # Meth and jumping - PSK
 @onready var jump_vel : float = ((2.0 * jump_height) / jump_time_to_peak) * -1.
 @onready var jump_gravity : float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.
 @onready var fall_gravity : float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.
 var coyote_time_left: float = 0.0
+var jump_buffer_time_left: float = 0.0
 
 @onready var player = $".."
 
@@ -63,18 +66,27 @@ func _physics_process(delta):
 
 	# Apply gravity.
 	if not player.is_on_floor():
-		player.velocity.y += (jump_gravity if player.velocity.y < 0.0 else fall_gravity) * delta # no delta mb, we're in phys_process
+		player.velocity.y += (jump_gravity if player.velocity.y < 0.0 else fall_gravity) * delta
 
 	if player.is_on_floor():
 		coyote_time_left = coyote_time
 	else:
 		coyote_time_left -= delta
 
+    # Handle jump buffering.
+	if jump_buffer_time_left > 0: jump_buffer_time_left -= delta
+	if jump_buffer_time_left > 0 and (player.is_on_floor() or coyote_time_left > 0):
+		player.velocity.y = jump_vel
+		jump_buffer_time_left = 0
+
 	# Handle jump.
 	if Input.is_action_just_released("move_jump") and player.velocity.y < 0:
-		player.velocity.y = jump_height / 4 # why 4 you might ask, well, i have zero fucking clue - PSK
-	if Input.is_action_just_pressed("move_jump") and (player.is_on_floor() or coyote_time_left > 0):
-		player.velocity.y = jump_vel
+		player.velocity.y = jump_height / 4  # why 4 you might ask, well, i have zero fucking clue - PSK
+	if Input.is_action_just_pressed("move_jump"):
+		if player.is_on_floor() or coyote_time_left > 0:
+			player.velocity.y = jump_vel
+		else:
+			jump_buffer_time_left = buffer_time  # Set the jump buffer time
 
 	# Handle crouching.
 	if Input.is_action_pressed("move_crouch") and player.is_on_floor():
@@ -164,3 +176,4 @@ func lose_control():
 
 func destroy():
 	Scenemanager.change_scene("main_menu")
+
