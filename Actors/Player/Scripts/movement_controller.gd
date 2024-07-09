@@ -80,9 +80,9 @@ func _physics_process(delta):
 		player.velocity.y = jump_vel
 		jump_buffer_time_left = 0
 
-	# Handle jump.
 	if Input.is_action_just_released("move_jump") and player.velocity.y < 0:
-		player.velocity.y = jump_vel / cancel_factor  # why 4 you might ask, well, i have zero fucking clue - PSK
+		player.velocity.y /= cancel_factor
+
 	if Input.is_action_just_pressed("move_jump"):
 		if player.is_on_floor() or coyote_time_left > 0:
 			player.velocity.y = jump_vel
@@ -107,6 +107,14 @@ func _physics_process(delta):
 			placeholder_sprite.polygon = default_placeholder_polygon
 			use_crouch_speed = false
 
+	_animate()
+
+	_evaluate_max_velocity()
+	_move_horizontal()
+
+	player.move_and_slide()
+
+func _animate():
 	if player.velocity.x < 0:
 		facing_right = false
 	elif player.velocity.x > 0:
@@ -134,11 +142,6 @@ func _physics_process(delta):
 	else:
 		if not animated_sprite.animation == "jump":
 			animated_sprite.play("jump")
-
-	_evaluate_max_velocity()
-	_move_horizontal()
-
-	player.move_and_slide()
 
 func _evaluate_control_degree():
 	if _control_degree != 1:
