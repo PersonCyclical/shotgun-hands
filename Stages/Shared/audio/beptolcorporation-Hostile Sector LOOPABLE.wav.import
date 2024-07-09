@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://nuhq40rqkcg5"
+path="res://.godot/imported/beptolcorporation-Hostile Sector LOOPABLE.wav-00e3999c83bec6bcfd7aff0159122aae.sample"
+
+[deps]
+
+source_file="res://Stages/Shared/audio/beptolcorporation-Hostile Sector LOOPABLE.wav"
+dest_files=["res://.godot/imported/beptolcorporation-Hostile Sector LOOPABLE.wav-00e3999c83bec6bcfd7aff0159122aae.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=true
+edit/loop_mode=2
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

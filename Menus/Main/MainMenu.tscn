@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bdopfeohkeodg"]
+[gd_scene load_steps=3 format=3 uid="uid://bdopfeohkeodg"]
 
 [ext_resource type="Script" path="res://Menus/Main/main_menu.gd" id="1_mbf0w"]
+[ext_resource type="AudioStream" uid="uid://bg0gbb7abkei" path="res://Stages/Shared/audio/stoicraven-Rust_Rock_Rumble.ogg" id="2_2bl0f"]
 
 [node name="MainMenu" type="Node"]
 script = ExtResource("1_mbf0w")
@@ -34,3 +35,8 @@ text = "Play"
 [node name="Quit" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Quit"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_2bl0f")
+volume_db = -5.0
+autoplay = true
