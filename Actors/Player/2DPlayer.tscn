@@ -109,7 +109,7 @@ speed = 25.0
 jump_height = 10.0
 jump_time_to_peak = 0.4
 jump_time_to_descent = 0.5
-cancel_factor = 1
+cancel_factor = 2
 
 [node name="LossOfControlTimer" type="Timer" parent="MovementController"]
 one_shot = true
