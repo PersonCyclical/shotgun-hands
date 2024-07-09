@@ -12,6 +12,7 @@ var momentum_retention_slide = 1.0
 @export var jump_height : float
 @export var jump_time_to_peak : float
 @export var jump_time_to_descent : float
+@export var cancel_factor: int = 4
 @export_subgroup("Polish")
 @export var coyote_time: float = 0.2
 @export var buffer_time: float = 0.2
@@ -81,12 +82,12 @@ func _physics_process(delta):
 
 	# Handle jump.
 	if Input.is_action_just_released("move_jump") and player.velocity.y < 0:
-		player.velocity.y = jump_height / 4  # why 4 you might ask, well, i have zero fucking clue - PSK
+		player.velocity.y = jump_vel / cancel_factor  # why 4 you might ask, well, i have zero fucking clue - PSK
 	if Input.is_action_just_pressed("move_jump"):
 		if player.is_on_floor() or coyote_time_left > 0:
 			player.velocity.y = jump_vel
 		else:
-			jump_buffer_time_left = buffer_time  # Set the jump buffer time
+			jump_buffer_time_left = buffer_time
 
 	# Handle crouching.
 	if Input.is_action_pressed("move_crouch") and player.is_on_floor():
